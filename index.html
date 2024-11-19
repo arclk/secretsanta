@@ -252,13 +252,13 @@
         <h1>Secret Santa 2024! 🎄</h1>
         
         <div class="greeting">
-            Ciao <span id="name">Achille</span>!
+            Ciao <span id="name">...</span>!
         </div>
         
         <div>Quest'anno dovrai fare un regalo a:</div>
         
         <div class="pairing-name" id="pairing-name">
-            Roberto
+            ...
         </div>
         
         <div class="pairing-details" id="pairing-details"></div>
@@ -269,7 +269,64 @@
     </div>
 
     <script>
-        // Script rimane invariato
+        // Estrae i parametri dall'URL
+        const getQueryParams = () => {
+            return Object.fromEntries(
+                new URLSearchParams(window.location.search).entries()
+            );
+        };
+
+        // Decodifica il pairing
+        const decodePairing = () => {
+            const params = getQueryParams();
+            
+            // Verifica che ci siano tutti i parametri necessari
+            if (!params.name || !params.key || !params.pairing) {
+                throw new Error("Link non valido");
+            }
+
+            // Decodifica il pairing
+            const decrypted = CryptoJS.AES.decrypt(params.pairing, params.key)
+                .toString(CryptoJS.enc.Utf8);
+
+            // Estrae nome e dettagli
+            const match = decrypted.match(/^([^(]+)(?: (\([^)]+\)))?$/);
+            if (!match) {
+                throw new Error("Formato del pairing non valido");
+            }
+
+            return {
+                name: params.name,
+                recipient: match[1].trim(),
+                details: match[2] ? match[2].trim() : null
+            };
+        };
+
+        // Previene il rimbalzo elastico su iOS
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Aggiorna la pagina con le informazioni decodificate
+        try {
+            const result = decodePairing();
+            
+            // Aggiorna i contenuti
+            document.getElementById('name').textContent = result.name;
+            document.getElementById('pairing-name').textContent = result.recipient;
+            
+            if (result.details) {
+                document.getElementById('pairing-details').textContent = result.details;
+            }
+        } catch (error) {
+            document.body.innerHTML = `
+                <div class="christmas-card" style="text-align: center; color: #D42304;">
+                    <h1>⚠️ Ops!</h1>
+                    <p>C'è stato un errore nel caricamento del tuo abbinamento.</p>
+                    <p style="margin-top: 20px; font-size: 14px;">${error.message}</p>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>

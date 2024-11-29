@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>🎄 Secret Santa - Il tuo abbinamento! 🎅🏻</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes snowfall {
+            0% {
+                background-position: 0px 0px, 0px 0px, 0px 0px;
+            }
+            100% {
+                background-position: 500px 1000px, 200px 400px, -100px 300px;
+            }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes appear {
+            0% { 
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            font-family: -apple-system, "Trebuchet MS", Arial, sans-serif;
+            background-color: #8e1313;
+            background-image: 
+                radial-gradient(white 2px, transparent 3px),
+                radial-gradient(white 1.5px, transparent 2.5px),
+                radial-gradient(white 1px, transparent 2px);
+            background-size: 550px 550px, 350px 350px, 250px 250px;
+            animation: snowfall 20s linear infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overflow-x: hidden;
+        }
+
+        html {
+            height: -webkit-fill-available;
+        }
+
+        .christmas-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+            padding: 32px 24px;
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            animation: appear 1s ease-out;
+            margin: 0 auto;
+        }
+
+        .border-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 10px solid transparent;
+            border-image: repeating-linear-gradient(
+                45deg,
+                #D42304,
+                #D42304 20px,
+                #0CB50C 20px,
+                #0CB50C 40px
+            ) 10;
+            border-radius: 16px;
+            pointer-events: none;
+        }
+
+        .santa-hat {
+            position: absolute;
+            top: -30px;
+            right: -15px;
+            font-size: 50px;
+            transform: rotate(30deg);
+            z-index: 3;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.1));
+        }
+
+        .achillos {
+            position: absolute;
+            bottom: -60px;
+            left: -45px; /* Cambiato da right a left */
+            width: 120px;
+            height: 120px;
+            z-index: 3;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.1));
+            transform: rotate(-15deg);
+        }
+
+        .achillos img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .holly {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 32px;
+        }
+
+        h1 {
+            color: #D42304;
+            font-size: 28px;
+            margin-bottom: 24px;
+            padding: 0 20px;
+        }
+
+        .greeting {
+            font-size: 22px;
+            color: #1a385c;
+            margin-bottom: 16px;
+        }
+
+        .pairing-name {
+            font-size: 36px;
+            color: #D42304;
+            font-weight: bold;
+            margin: 2rem;
+            padding: 16px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            animation: float 3s ease-in-out infinite;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .pairing-details {
+            font-size: 18px;
+            color: #0CB50C;
+            font-style: italic;
+            margin-bottom: 24px;
+            padding: 0 16px;
+        }
+
+        .footer {
+            color: #1a385c;
+            font-size: 18px;
+            margin-top: 24px;
+        }
+
+        @media screen and (max-width: 350px) {
+            body {
+                padding: 12px;
+            }
+
+            .christmas-card {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .pairing-name {
+                font-size: 32px;
+                margin: 24px 0;
+            }
+
+            .santa-hat {
+                font-size: 40px;
+                top: -25px;
+                right: -10px;
+            }
+
+            .holly {
+                font-size: 28px;
+                top: 12px;
+                left: 12px;
+            }
+
+            .achillos {
+                width: 80px;
+                height: 80px;
+                bottom: -40px;
+                left: -25px;
+                transform: rotate(-15deg);
+                transform: translate(0, 0); /* Assicura che l'immagine rimanga nel viewport */
+            }
+        }
+
+        @media screen and (max-width: 500px) {
+            .christmas-card {
+                margin: 40px 0;
+                padding-bottom: 40px; /* Aggiunto spazio extra in basso */
+            }
+
+            .achillos {
+                width: 90px;
+                height: 90px;
+                bottom: -35px;
+                left: -30px;
+                transform: rotate(-15deg);
+            }
+        }
+
+        /* Aggiunto nuovo media query per schermi molto piccoli */
+        @media screen and (max-width: 320px) {
+            .achillos {
+                width: 65px;
+                height: 65px;
+                bottom: -32px;
+                left: -15px;
+                transform: rotate(-15deg);
+            }
+
+            .christmas-card {
+                padding-bottom: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="christmas-card">
+        <div class="border-pattern"></div>
+        <div class="santa-hat">🎅🏻</div>
+        <div class="achillos"><img src="img/achillos.png" alt="achillos"></div>
+
+        <h1>Secret Santa 2025! 🎄</h1>
+        
+        <div class="greeting">
+            Ciao <span id="name">...</span>!
+        </div>
+        
+        <div>Quest'anno dovrai fare un regalo a:</div>
+        
+        <div class="pairing-name" id="pairing-name">
+            ...
+        </div>
+        
+        <div class="pairing-details" id="pairing-details"></div>
+        
+        <div class="footer">
+            🎄 Buon Natale! 🎁
+        </div>
+    </div>
+
+    <script>
+        // Estrae i parametri dall'URL
+        const getQueryParams = () => {
+            return Object.fromEntries(
+                new URLSearchParams(window.location.search).entries()
+            );
+        };
+
+        // Decodifica il pairing
+        const decodePairing = () => {
+            const params = getQueryParams();
+            
+            // Verifica che ci siano tutti i parametri necessari
+            if (!params.name || !params.key || !params.pairing) {
+                throw new Error("Link non valido");
+            }
+
+            // Decodifica il pairing
+            const decrypted = CryptoJS.AES.decrypt(params.pairing, params.key)
+                .toString(CryptoJS.enc.Utf8);
+
+            // Estrae nome e dettagli
+            const match = decrypted.match(/^([^(]+)(?: (\([^)]+\)))?$/);
+            if (!match) {
+                throw new Error("Formato del pairing non valido");
+            }
+
+            return {
+                name: params.name,
+                recipient: match[1].trim(),
+                details: match[2] ? match[2].trim() : null
+            };
+        };
+
+        // Previene il rimbalzo elastico su iOS
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        // Aggiorna la pagina con le informazioni decodificate
+        try {
+            const result = decodePairing();
+            
+            // Aggiorna i contenuti
+            document.getElementById('name').textContent = result.name;
+            document.getElementById('pairing-name').textContent = result.recipient;
+            
+            if (result.details) {
+                document.getElementById('pairing-details').textContent = result.details;
+            }
+        } catch (error) {
+            document.body.innerHTML = `
+                <div class="christmas-card" style="text-align: center; color: #D42304;">
+                    <h1>⚠️ Ops!</h1>
+                    <p>C'è stato un errore nel caricamento del tuo abbinamento.</p>
+                    <p style="margin-top: 20px; font-size: 14px;">${error.message}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
